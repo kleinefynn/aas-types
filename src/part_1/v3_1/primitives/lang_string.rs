@@ -53,7 +53,7 @@ impl FromStr for LangString {
     /// ```
     /// use std::str::FromStr;
     /// use oxilangtag::LanguageTag;
-    /// use aas_types::part_1::v3_1::LangString;
+    /// use aas::part_1::v3_1::LangString;
     ///
     /// let expected = LangString::try_new("EN", "Speed".to_string()).unwrap();
     /// let actual = LangString::from_str(r#""Speed"@EN"#).ok().unwrap();
