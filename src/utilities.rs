@@ -40,14 +40,16 @@ where
 {
     let buf = String::deserialize(deserializer)?;
 
-    if buf.len() < 1 {
+    let length = buf.chars().count();
+
+    if length < 1 {
         return Err(serde::de::Error::custom("Identifier is too short. Min 1."));
     }
 
-    if buf.len() > 2048 {
+    if length > 2048 {
         return Err(serde::de::Error::custom(format!(
             "Identifier is too long. Max 2048 chars, is {}",
-            buf.len()
+            length
         )));
     }
 
@@ -68,14 +70,16 @@ where
 {
     let buf = String::deserialize(deserializer)?;
 
-    if buf.len() < 1 {
+    let length = buf.chars().count();
+
+    if length < 1 {
         return Err(serde::de::Error::custom("Identifier is too short. Min 1."));
     }
 
-    if buf.len() > 64 {
+    if length > 64 {
         return Err(serde::de::Error::custom(format!(
             "Identifier is too long. Max 64 chars, is {}",
-            buf.len()
+            length
         )));
     }
 
@@ -95,15 +99,17 @@ where
     D: Deserializer<'de>,
 {
     let buf = String::deserialize(deserializer)?;
+    
+    let length = buf.chars().count();
 
-    if buf.len() < 1 {
+    if length < 1 {
         return Err(serde::de::Error::custom("Identifier is too short. Min 1."));
     }
 
-    if buf.len() > 255 {
+    if length > 255 {
         return Err(serde::de::Error::custom(format!(
             "Identifier is too long. Max 255 chars, is {}",
-            buf.len()
+            length
         )));
     }
 

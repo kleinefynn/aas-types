@@ -40,7 +40,7 @@ impl TryFrom<String> for Label {
             return Err(LabelError::TooShort);
         }
 
-        if value.len() > 64 {
+        if value.chars().count() > 64 {
             return Err(LabelError::TooLong);
         }
 
@@ -48,7 +48,7 @@ impl TryFrom<String> for Label {
             return Err(LabelError::InvalidCharacter);
         }
 
-        Ok(Label(value.to_owned()))
+        Ok(Label(value))
     }
 }
 
@@ -56,19 +56,7 @@ impl TryFrom<&str> for Label {
     type Error = LabelError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        if value.is_empty() {
-            return Err(LabelError::TooShort);
-        }
-
-        if value.len() > 64 {
-            return Err(LabelError::TooLong);
-        }
-
-        if !validate_text(value) {
-            return Err(LabelError::InvalidCharacter);
-        }
-
-        Ok(Label(value.to_string()))
+        Self::try_from(value.to_string())
     }
 }
 

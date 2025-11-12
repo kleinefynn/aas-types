@@ -40,7 +40,7 @@ impl TryFrom<String> for MessageTopic {
             return Err(MessageTopicError::TooShort);
         }
 
-        if value.len() > 64 {
+        if value.chars().count()  > 64 {
             return Err(MessageTopicError::TooLong);
         }
 
@@ -48,7 +48,7 @@ impl TryFrom<String> for MessageTopic {
             return Err(MessageTopicError::InvalidCharacter);
         }
 
-        Ok(MessageTopic(value.to_owned()))
+        Ok(MessageTopic(value))
     }
 }
 
@@ -56,19 +56,7 @@ impl TryFrom<&str> for MessageTopic {
     type Error = MessageTopicError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        if value.is_empty() {
-            return Err(MessageTopicError::TooShort);
-        }
-
-        if value.len() > 255 {
-            return Err(MessageTopicError::TooLong);
-        }
-
-        if !validate_text(value) {
-            return Err(MessageTopicError::InvalidCharacter);
-        }
-
-        Ok(MessageTopic(value.to_string()))
+        Self::try_from(value.to_string())
     }
 }
 
