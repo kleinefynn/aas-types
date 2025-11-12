@@ -1,4 +1,4 @@
-use crate::part_1::v3_1::primitives::{DateTimeUTC, MessageTopicType};
+use crate::part_1::v3_1::primitives::{DateTimeUTC, MessageTopic};
 use crate::part_1::v3_1::reference::Reference;
 use crate::part_1::v3_1::submodel_elements::SubmodelElementFields;
 use serde::{Deserialize, Serialize};
@@ -17,7 +17,7 @@ pub struct BasicEventElement {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "messageTopic")]
-    pub message_topic: Option<MessageTopicType>,
+    pub message_topic: Option<MessageTopic>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "messageBroker")]

@@ -1,6 +1,6 @@
 use crate::part_1::v3_1::attributes::data_specification::HasDataSpecification;
 use crate::part_1::v3_1::attributes::identifiable::Identifiable;
-use crate::part_1::v3_1::primitives::{ContentType, Identifier, LabelType, Uri};
+use crate::part_1::v3_1::primitives::{ContentType, Identifier, Label, Uri};
 use crate::part_1::v3_1::reference::Reference;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
@@ -57,7 +57,7 @@ pub struct AssetInformationInner {
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct SpecificAssetId {
-    pub name: LabelType,
+    pub name: Label,
 
     pub value: Identifier,
 

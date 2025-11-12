@@ -24,7 +24,7 @@ pub struct AdministrativeInformation {
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize)]
-struct Version {
+pub struct Version {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]

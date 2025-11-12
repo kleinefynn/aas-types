@@ -6,10 +6,8 @@
 //! Because each spec is versioned on their own, the modules are ordered `specs/version` instead of
 //! `version/specs`, i.e. `aas::part1::v3.1`.
 
-
 /// Part1: Metamodel
 pub mod part_1;
-
 
 /// Utility functions like validating text to specific formats and deserializers to specific needs,
 /// like text with defined constraints.
