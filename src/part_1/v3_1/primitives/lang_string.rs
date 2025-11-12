@@ -71,7 +71,7 @@ impl FromStr for LangString {
 
         // Question: Build Proper parser ?
         // "...", the double quotes are important.
-        if text.len() < 2 {
+        if text.chars().count() < 2 {
             return Err(LangStringParseRDFError::IncorrectFormat);
         }
 
