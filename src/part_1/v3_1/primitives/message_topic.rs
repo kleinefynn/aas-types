@@ -1,12 +1,13 @@
-use crate::utilities::{deserialize_message_topic_type, validate_text};
-use serde::{Deserialize, Serialize};
+use crate::utilities::{validate_text};
+use serde::{de, Deserialize, Deserializer, Serialize};
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::ops::Deref;
+use serde::de::Visitor;
 use thiserror::Error;
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Deserialize, Serialize)]
-pub struct MessageTopic(#[serde(deserialize_with = "deserialize_message_topic_type")] String);
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Serialize)]
+pub struct MessageTopic(String);
 
 #[derive(Error, Debug)]
 pub enum MessageTopicError {
@@ -71,5 +72,40 @@ impl Deref for MessageTopic {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl<'de> Deserialize<'de> for MessageTopic {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct MessageTopicVisitor;
+
+        impl<'de> Visitor<'de> for MessageTopicVisitor {
+            type Value = MessageTopic;
+
+            fn expecting(&self, formatter: &mut Formatter) -> fmt::Result {
+                formatter.write_str("a valid message topic string")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<MessageTopic, E>
+            where
+                E: de::Error,
+            {
+                MessageTopic::try_from(value)
+                    .map_err(|err| de::Error::custom(format!("Invalid MessageTopic: {}", err)))
+            }
+
+            fn visit_string<E>(self, value: String) -> Result<MessageTopic, E>
+            where
+                E: de::Error,
+            {
+                MessageTopic::try_from(value)
+                    .map_err(|err| de::Error::custom(format!("Invalid MessageTopic: {}", err)))
+            }
+        }
+
+        deserializer.deserialize_string(MessageTopicVisitor)
     }
 }

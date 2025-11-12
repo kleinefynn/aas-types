@@ -1,12 +1,13 @@
-use crate::utilities::{deserialize_identifier, validate_text};
-use serde::{Deserialize, Serialize};
+use crate::utilities::{validate_text};
+use serde::{de, Deserialize, Deserializer, Serialize};
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::ops::Deref;
+use serde::de::Visitor;
 use thiserror::Error;
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Deserialize, Serialize)]
-pub struct Identifier(#[serde(deserialize_with = "deserialize_identifier")] String);
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Serialize)]
+pub struct Identifier(String);
 
 #[derive(Error, Debug, PartialEq)]
 pub enum IdentifierError {
@@ -71,6 +72,41 @@ impl Deref for Identifier {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl<'de> Deserialize<'de> for Identifier {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct IdentifierVisitor;
+
+        impl<'de> Visitor<'de> for IdentifierVisitor {
+            type Value = Identifier;
+
+            fn expecting(&self, formatter: &mut Formatter) -> fmt::Result {
+                formatter.write_str("a valid Identifier string")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Identifier, E>
+            where
+                E: de::Error,
+            {
+                Identifier::try_from(value)
+                    .map_err(|err| de::Error::custom(format!("Invalid Identifier: {}", err)))
+            }
+
+            fn visit_string<E>(self, value: String) -> Result<Identifier, E>
+            where
+                E: de::Error,
+            {
+                crate::part_1::v3_1::primitives::identifier::Identifier::try_from(value)
+                    .map_err(|err| de::Error::custom(format!("Invalid Identifier: {}", err)))
+            }
+        }
+
+        deserializer.deserialize_string(IdentifierVisitor)
     }
 }
 

@@ -1,12 +1,13 @@
-use crate::utilities::{deserialize_label_type, validate_text};
-use serde::{Deserialize, Serialize};
+use crate::utilities::{validate_text};
+use serde::{de, Deserialize, Deserializer, Serialize};
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::ops::Deref;
+use serde::de::Visitor;
 use thiserror::Error;
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Deserialize, Serialize)]
-pub struct Label(#[serde(deserialize_with = "deserialize_label_type")] String);
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Serialize)]
+pub struct Label(String);
 
 #[derive(Error, Debug)]
 pub enum LabelError {
@@ -71,5 +72,40 @@ impl Deref for Label {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl<'de> Deserialize<'de> for Label {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct LabelVisitor;
+
+        impl<'de> Visitor<'de> for LabelVisitor {
+            type Value = Label;
+
+            fn expecting(&self, formatter: &mut Formatter) -> fmt::Result {
+                formatter.write_str("a valid label string")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Label, E>
+            where
+                E: de::Error,
+            {
+                Label::try_from(value)
+                    .map_err(|err| de::Error::custom(format!("Invalid Label: {}", err)))
+            }
+
+            fn visit_string<E>(self, value: String) -> Result<Label, E>
+            where
+                E: de::Error,
+            {
+                Label::try_from(value)
+                    .map_err(|err| de::Error::custom(format!("Invalid Label: {}", err)))
+            }
+        }
+
+        deserializer.deserialize_string(LabelVisitor)
     }
 }
