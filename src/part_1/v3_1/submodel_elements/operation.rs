@@ -3,9 +3,11 @@ use crate::part_1::v3_1::attributes::qualifiable::Qualifiable;
 use crate::part_1::v3_1::attributes::referable::Referable;
 use crate::part_1::v3_1::attributes::semantics::HasSemantics;
 use crate::part_1::v3_1::submodel_elements::SubmodelElement;
+use crate::part_1::{MetamodelError, ToJsonMetamodel};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize, Default)]
+#[serde(tag = "modelType")]
 pub struct Operation {
     // Inherited from DataElement
     #[serde(flatten)]
@@ -28,4 +30,12 @@ pub struct Operation {
 
     #[serde(rename = "inoutputVariable")]
     pub inoutput_variable: Option<Box<SubmodelElement>>,
+}
+
+impl ToJsonMetamodel for Operation {
+    type Error = MetamodelError;
+
+    fn to_json_metamodel(&self) -> Result<String, Self::Error> {
+        serde_json::to_string(&self).map_err(|e| MetamodelError::FailedSerialisation(e))
+    }
 }

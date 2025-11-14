@@ -1,3 +1,5 @@
+use crate::part_1::MetamodelError;
+use crate::part_1::ToJsonMetamodel;
 use crate::part_1::v3_1::attributes::data_specification::HasDataSpecification;
 use crate::part_1::v3_1::attributes::qualifiable::Qualifiable;
 use crate::part_1::v3_1::attributes::referable::Referable;
@@ -40,6 +42,50 @@ impl Blob {
             value: None,
             content_type,
         }
+    }
+}
+
+#[derive(Clone, PartialEq, Debug, Deserialize, Serialize, Default)]
+#[serde(tag = "modelType", rename = "Blob")]
+pub struct BlobMeta {
+    // Inherited from DataElement
+    #[serde(flatten)]
+    pub referable: Referable,
+
+    #[serde(flatten)]
+    pub semantics: HasSemantics,
+
+    #[serde(flatten)]
+    pub qualifiable: Qualifiable,
+
+    #[serde(flatten)]
+    pub embedded_data_specifications: HasDataSpecification,
+    // ----- end inheritance
+}
+
+impl From<Blob> for BlobMeta {
+    fn from(blob: Blob) -> Self {
+        Self {
+            referable: blob.referable,
+            semantics: blob.semantics,
+            qualifiable: blob.qualifiable,
+            embedded_data_specifications: blob.embedded_data_specifications,
+        }
+    }
+}
+
+impl From<&Blob> for BlobMeta {
+    fn from(blob: &Blob) -> Self {
+        blob.clone().into()
+    }
+}
+
+impl ToJsonMetamodel for Blob {
+    type Error = MetamodelError;
+
+    fn to_json_metamodel(&self) -> Result<String, Self::Error> {
+        serde_json::to_string::<BlobMeta>(&self.into())
+            .map_err(|e| MetamodelError::FailedSerialisation(e))
     }
 }
 

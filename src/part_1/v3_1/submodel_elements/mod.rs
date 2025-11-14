@@ -10,6 +10,10 @@ mod property;
 mod range;
 mod reference_element;
 mod relationship_element;
+mod submodel_element_collection;
+pub use submodel_element_collection::*;
+mod submodel_element_list;
+pub use submodel_element_list::*;
 
 use crate::part_1::v3_1::attributes::data_specification::HasDataSpecification;
 use crate::part_1::v3_1::attributes::qualifiable::Qualifiable;
@@ -29,9 +33,8 @@ use crate::part_1::v3_1::submodel_elements::reference_element::ReferenceElement;
 use crate::part_1::v3_1::submodel_elements::relationship_element::{
     AnnotatedRelationshipElement, RelationshipElement,
 };
+use crate::part_1::{MetamodelError, ToJsonMetamodel};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-
 // TODO
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(tag = "modelType")]
@@ -54,18 +57,6 @@ pub enum SubmodelElement {
     SubmodelElementList(SubmodelElementList),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
-pub struct SubmodelElementCollection {
-    value: Option<Vec<SubmodelElement>>,
-}
-
-// TODO: TYPING
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
-pub struct SubmodelElementList {
-    #[serde(flatten)]
-    values: HashMap<String, serde_json::Value>,
-}
-
 /// Every SubmodelElement has these
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
 pub struct SubmodelElementFields {
@@ -86,6 +77,32 @@ pub struct SubmodelElementFields {
 
 // maybe without variants?
 pub type AasSubmodelElements = SubmodelElement;
+
+impl ToJsonMetamodel for SubmodelElement {
+    type Error = MetamodelError;
+
+    fn to_json_metamodel(&self) -> Result<String, Self::Error> {
+        match self {
+            SubmodelElement::RelationshipElement(_) => Err(MetamodelError::MetamodelNotSupported),
+            SubmodelElement::AnnotatedRelationshipElement(_) => {
+                Err(MetamodelError::MetamodelNotSupported)
+            }
+            SubmodelElement::BasicEventElement(elm) => elm.to_json_metamodel(),
+            SubmodelElement::Blob(elm) => elm.to_json_metamodel(),
+            SubmodelElement::Capability(elm) => elm.to_json_metamodel(),
+            SubmodelElement::DataElement(elm) => elm.to_json_metamodel(),
+            SubmodelElement::Entity(elm) => Ok(elm.to_json_metamodel().unwrap()),
+            SubmodelElement::File(elm) => elm.to_json_metamodel(),
+            SubmodelElement::MultiLanguageProperty(elm) => elm.to_json_metamodel(),
+            SubmodelElement::Operation(elm) => elm.to_json_metamodel(),
+            SubmodelElement::Property(elm) => elm.to_json_metamodel(),
+            SubmodelElement::Range(elm) => Ok(elm.to_json_metamodel().unwrap()),
+            SubmodelElement::ReferenceElement(elm) => Ok(elm.to_json_metamodel().unwrap()),
+            SubmodelElement::SubmodelElementCollection(elm) => Ok(elm.to_json_metamodel().unwrap()),
+            SubmodelElement::SubmodelElementList(elm) => elm.to_json_metamodel(),
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {

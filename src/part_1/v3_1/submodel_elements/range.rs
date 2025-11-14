@@ -1,3 +1,4 @@
+use crate::part_1::ToJsonMetamodel;
 use chrono::{DateTime, NaiveTime, Utc};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
@@ -5,6 +6,7 @@ use strum::{Display, EnumString};
 // TODO: If the min value is missing, the value is assumed to be negative infinite.
 // TODO: If the max value is missing, the value is assumed to be positive infinite.
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize, Default)]
+#[serde(tag = "modelType", rename = "Range")]
 pub struct RangeInner<T> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub min: Option<T>,
@@ -119,4 +121,28 @@ pub enum Range {
     // string related
     #[serde(rename = "xs:anyURI")]
     AnyURI(RangeInner<String>),
+}
+
+impl ToJsonMetamodel for Range {
+    type Error = ();
+
+    fn to_json_metamodel(&self) -> Result<String, Self::Error> {
+        Ok(format!(r#"{{"valueType":{}}}"#, self.to_string()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_range_to_json() {
+        let expected = r#"{"valueType":"xs:int","modelType":"Range","min":1,"max":10}"#;
+        let actual = Range::Int(RangeInner {
+            min: Some(1),
+            max: Some(10),
+        });
+        let actual = serde_json::to_string(&actual).unwrap();
+        assert_eq!(expected, actual);
+    }
 }

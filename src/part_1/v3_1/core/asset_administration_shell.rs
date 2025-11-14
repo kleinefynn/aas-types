@@ -4,6 +4,7 @@ use crate::part_1::v3_1::attributes::semantics::HasSemantics;
 use crate::part_1::v3_1::primitives::{ContentType, Identifier, Label, Uri};
 use crate::part_1::v3_1::reference::Reference;
 use crate::part_1::v3_1::reference::deserialize_optional_external_reference;
+use crate::part_1::{ToJsonMetamodel, ToJsonValue};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
 
@@ -26,6 +27,42 @@ pub struct AssetAdministrationShell {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub submodels: Option<Vec<Reference>>,
+}
+
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+#[serde(tag = "AssetAdministrationShellMeta")]
+pub struct AssetAdministrationShellMetamodel {
+    #[serde(flatten)]
+    pub identifiable: Identifiable,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(flatten)]
+    pub data_specification: Option<HasDataSpecification>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "derivedFrom")]
+    pub derived_from: Option<Reference>,
+}
+
+impl From<AssetAdministrationShell> for AssetAdministrationShellMetamodel {
+    fn from(value: AssetAdministrationShell) -> Self {
+        Self {
+            identifiable: value.identifiable,
+            data_specification: value.data_specification,
+            derived_from: value.derived_from,
+        }
+    }
+}
+
+// Todo: Test
+impl ToJsonMetamodel for AssetAdministrationShell {
+    type Error = serde_json::Error;
+
+    fn to_json_metamodel(&self) -> Result<String, Self::Error> {
+        let meta = AssetAdministrationShellMetamodel::from(self.clone());
+
+        serde_json::to_string(&meta)
+    }
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, EnumString, Display)]

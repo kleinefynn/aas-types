@@ -1,3 +1,5 @@
+use crate::part_1::MetamodelError;
+use crate::part_1::ToJsonMetamodel;
 use crate::part_1::v3_1::attributes::data_specification::HasDataSpecification;
 use crate::part_1::v3_1::attributes::qualifiable::Qualifiable;
 use crate::part_1::v3_1::attributes::referable::Referable;
@@ -30,6 +32,14 @@ impl Capability {
             qualifiable: Qualifiable::default(),
             embedded_data_specifications: HasDataSpecification::default(),
         }
+    }
+}
+
+impl ToJsonMetamodel for Capability {
+    type Error = MetamodelError;
+
+    fn to_json_metamodel(&self) -> Result<String, Self::Error> {
+        serde_json::to_string(&self).map_err(|e| MetamodelError::FailedSerialisation(e))
     }
 }
 

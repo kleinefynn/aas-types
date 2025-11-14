@@ -1,3 +1,4 @@
+use crate::part_1::ToJsonMetamodel;
 use crate::part_1::v3_1::core::SpecificAssetId;
 use crate::part_1::v3_1::primitives::Identifier;
 use crate::part_1::v3_1::submodel_elements::SubmodelElement;
@@ -8,6 +9,7 @@ use strum::{Display, EnumString};
 /// it is composed of (e.g. bill of material).
 /// These parts are called entities. Not all entities have a global asset ID.
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize, Display, EnumString)]
+#[serde(tag = "entityType")]
 pub enum Entity {
     /// There is no separate Asset Administration Shell for co-managed entities.
     /// Co-managed entities need to be part of a self-managed entity.
@@ -31,4 +33,15 @@ pub struct EntityInner {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "specificAssetId")]
     pub specific_asset_id: Option<Vec<SpecificAssetId>>,
+}
+
+impl ToJsonMetamodel for Entity {
+    type Error = ();
+
+    fn to_json_metamodel(&self) -> Result<String, Self::Error> {
+        match self {
+            Entity::CoManagedEntity(_) => Ok(r#"{"entityType":"CoManagedEntity"}"#.into()),
+            Entity::SelfManagedEntity(_) => Ok(r#"{"entityType":"SelfManagedEntity"}"#.into()),
+        }
+    }
 }
